@@ -24,7 +24,7 @@ jobs:
           import sys
           
           # Parametri dello spazio
-          repo_id = 'Marco224/SelfStream'
+          repo_id = 'Marco224/EasyProxy'
           token = os.environ.get('HF_TOKEN')
           
           if not token:
