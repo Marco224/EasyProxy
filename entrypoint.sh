@@ -37,11 +37,24 @@ if [ "$ENABLE_WARP" = "true" ]; then
         # Set license key if provided
         if [ -n "$WARP_LICENSE_KEY" ]; then
             echo "🔑 Setting WARP license key..."
-            warp-cli --accept-tos registration set-key "$WARP_LICENSE_KEY"
+            warp-cli --accept-tos registration license "$WARP_LICENSE_KEY"
         fi
         
         # Connect
         echo "🔗 Connecting to WARP..."
+        
+        # Add exclusions for domains that block WARP (Cinemacity)
+        # We try both new (v2024+) and old warp-cli commands for compatibility
+        (warp-cli --accept-tos tunnel host add cinemacity.cc > /dev/null 2>&1 || \
+         warp-cli --accept-tos add-excluded-domain cinemacity.cc > /dev/null 2>&1) || true
+         
+        (warp-cli --accept-tos tunnel host add cccdn.net > /dev/null 2>&1 || \
+         warp-cli --accept-tos add-excluded-domain cccdn.net > /dev/null 2>&1) || true
+         
+         
+        # Set mode to WARP (Full TUN/VPN mode)
+        warp-cli --accept-tos mode warp
+        
         warp-cli --accept-tos connect
         
         # Small delay for connection to stabilize
