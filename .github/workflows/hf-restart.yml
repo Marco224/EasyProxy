@@ -25,7 +25,7 @@ jobs:
           import time
           
           # Parametri dello spazio
-          repo_id = 'Marco224/EasyProxy'
+          repo_id = 'Marco224/Turtle'
           token = os.environ.get('HF_TOKEN')
           
           if not token:
