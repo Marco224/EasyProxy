@@ -1,4 +1,4 @@
-name: Hugging Face Space Factory Rebuild
+name: Hugging Face Proiettore Space Factory Rebuild
 
 on:
   schedule:
