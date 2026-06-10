@@ -14,7 +14,7 @@ import aiohttp
 from aiohttp import ClientSession, ClientTimeout, TCPConnector
 from aiohttp_socks import ProxyError as AioProxyError
 from python_socks import ProxyError as PyProxyError
-from config import TRANSPORT_ROUTES, GLOBAL_PROXIES, WARP_PROXY_URL, get_connector_for_proxy, SELECTED_PROXY_CONTEXT, STRICT_PROXY_CONTEXT, get_solver_proxy_url, build_flaresolverr_proxy, get_extractor_proxies, get_ordered_proxies_for_url, should_allow_direct_fallback, mark_proxy_dead, DEAD_PROXIES, _proxy_lock
+from config import TRANSPORT_ROUTES, GLOBAL_PROXIES, WARP_PROXY_URL, get_connector_for_proxy, SELECTED_PROXY_CONTEXT, STRICT_PROXY_CONTEXT, get_solver_proxy_url, build_proxy_with_auth, get_extractor_proxies, get_ordered_proxies_for_url, should_allow_direct_fallback, mark_proxy_dead, DEAD_PROXIES, _proxy_lock
 from config import PROXY_TEST_TIMEOUT, PROXY_TEST_CONCURRENCY
 
 from utils.cookie_cache import CookieCache
@@ -529,15 +529,23 @@ class VixSrcExtractor:
                     name, value = c.strip().split("=", 1)
                     cookies.append({"name": name, "value": value, "domain": f".{urlparse(url).hostname}", "path": "/"})
 
-        proxy_url = None
+        proxy_cfg = None
         if forced_proxy:
-            p = build_flaresolverr_proxy(forced_proxy)
+            p = build_proxy_with_auth(forced_proxy)
             if p:
-                proxy_url = p
+                proxy_cfg = {"server": p["url"]}
+                if "username" in p:
+                    proxy_cfg["username"] = p["username"]
+                    proxy_cfg["password"] = p["password"]
         else:
             raw = await self._preferred_proxy(url)
             if raw:
-                proxy_url = build_flaresolverr_proxy(raw)
+                p = build_proxy_with_auth(raw)
+                if p:
+                    proxy_cfg = {"server": p["url"]}
+                    if "username" in p:
+                        proxy_cfg["username"] = p["username"]
+                        proxy_cfg["password"] = p["password"]
 
         def _run():
             fetch_kwargs = {
@@ -550,8 +558,8 @@ class VixSrcExtractor:
             }
             if user_agent:
                 fetch_kwargs["useragent"] = user_agent
-            if proxy_url:
-                fetch_kwargs["proxy"] = proxy_url
+            if proxy_cfg:
+                fetch_kwargs["proxy"] = proxy_cfg
             response = StealthyFetcher.fetch(url, **fetch_kwargs)
             import time
             time.sleep(0.5)

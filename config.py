@@ -620,11 +620,12 @@ def get_solver_proxy_url(proxy_url: str | None) -> str | None:
     return proxy_url
 
 
-def build_flaresolverr_proxy(proxy_url: str | None) -> dict | None:
-    """Converte un proxy URL in formato FlareSolverr, estraendo credenziali separatamente.
+def build_proxy_with_auth(proxy_url: str | None) -> dict | None:
+    """Converte un proxy URL in dict con username/password separati.
 
-    FlareSolverr richiede username/password come campi separati perché Chromium
-    non supporta --proxy-server con credenziali nell'URL (funziona solo via estensione).
+    Chromium (via Playwright/Scrapling/FlareSolverr) non supporta
+    --proxy-server con credenziali nell'URL. Funziona solo se username
+    e password sono campi separati.
     """
     if not proxy_url:
         return None
