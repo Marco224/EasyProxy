@@ -410,7 +410,7 @@
             <div class="resource-grid">
                 <div class="resource-item">
                     <div class="resource-header">
-                        <div class="resource-name">CPU Usage</div>
+                        <div class="resource-name">CPU Usage (EasyProxy)</div>
                         <div class="resource-val" id="cpu-percent">0%</div>
                     </div>
                     <div class="progress-bar-container">
@@ -419,7 +419,7 @@
                 </div>
                 <div class="resource-item">
                     <div class="resource-header">
-                        <div class="resource-name">RAM Usage</div>
+                        <div class="resource-name">RAM Usage (EasyProxy)</div>
                         <div class="resource-val" id="ram-percent">0%</div>
                     </div>
                     <div class="progress-bar-container">
@@ -429,7 +429,7 @@
                 </div>
                 <div class="resource-item">
                     <div class="resource-header">
-                        <div class="resource-name">Disk Space (DVR)</div>
+                        <div class="resource-name">Disk Space (System)</div>
                         <div class="resource-val" id="disk-percent">0%</div>
                     </div>
                     <div class="progress-bar-container">
@@ -440,7 +440,7 @@
                 <div class="resource-item speedtest-row">
                     <div class="speedtest-info">
                         <div class="resource-header" style="flex-direction:column;align-items:flex-start;gap:2px">
-                            <div class="resource-name">Network Speed</div>
+                            <div class="resource-name">Network Speed (System)</div>
                             <div class="resource-val" id="net-speed" style="font-size:0.85rem">—</div>
                         </div>
                         <div style="display:flex;gap:1rem;margin-top:4px;font-size:0.75rem;color:var(--text-muted)">
@@ -588,10 +588,6 @@
                 <input type="number" id="proxy-test-timeout" value="10" min="2" onchange="saveField('proxy_test_timeout', parseInt(this.value))">
             </div>
             <div class="row">
-                <label>Segment Cache TTL</label>
-                <input type="number" id="segment-cache-ttl" value="30" min="0" onchange="saveField('segment_cache_ttl', parseInt(this.value))">
-            </div>
-            <div class="row">
                 <label>Proxy Test Concurrency</label>
                 <input type="number" id="proxy-test-concurrency" value="30" min="0" onchange="saveField('proxy_test_concurrency', parseInt(this.value) || 0)">
             </div>
@@ -661,6 +657,7 @@ function updateSpeedtestButtons(cfg) {
 
 async function runAllSpeedtests() {
     const btn = document.getElementById('speedtest-btn');
+    if (btn.disabled) return;
     const result = document.getElementById('speedtest-result');
     btn.disabled = true;
     btn.innerHTML = '⏳ Running...';
@@ -768,7 +765,6 @@ async function loadConfig() {
         document.getElementById('dvr-max').value = config.max_recording_duration || 28800;
         document.getElementById('dvr-retention').value = config.recordings_retention_days || 7;
         document.getElementById('proxy-test-timeout').value = config.proxy_test_timeout || 10;
-        document.getElementById('segment-cache-ttl').value = config.segment_cache_ttl || 30;
         document.getElementById('proxy-test-concurrency').value = (config.proxy_test_concurrency != null ? config.proxy_test_concurrency : 30);
         document.getElementById('log-level').value = config.log_level || 'WARNING';
 
@@ -776,12 +772,12 @@ async function loadConfig() {
         if (config.system_stats) {
             const stats = config.system_stats;
             
-            document.getElementById('cpu-percent').textContent = stats.cpu.percent + '%';
-            document.getElementById('cpu-bar').style.width = stats.cpu.percent + '%';
+            document.getElementById('cpu-percent').textContent = stats.proxy_cpu.percent + '%';
+            document.getElementById('cpu-bar').style.width = stats.proxy_cpu.percent + '%';
             
-            document.getElementById('ram-percent').textContent = stats.ram.percent + '%';
-            document.getElementById('ram-bar').style.width = stats.ram.percent + '%';
-            document.getElementById('ram-details').textContent = `${formatBytes(stats.ram.used)} / ${formatBytes(stats.ram.total)}`;
+            document.getElementById('ram-percent').textContent = stats.proxy_ram.percent + '%';
+            document.getElementById('ram-bar').style.width = stats.proxy_ram.percent + '%';
+            document.getElementById('ram-details').textContent = `${formatBytes(stats.proxy_ram.used)} / ${formatBytes(stats.proxy_ram.total)}`;
             
             document.getElementById('disk-percent').textContent = stats.disk.percent + '%';
             document.getElementById('disk-bar').style.width = stats.disk.percent + '%';
@@ -1283,12 +1279,12 @@ setInterval(async () => {
             const tempConfig = await resp.json();
             if (tempConfig.system_stats) {
                 const stats = tempConfig.system_stats;
-                document.getElementById('cpu-percent').textContent = stats.cpu.percent + '%';
-                document.getElementById('cpu-bar').style.width = stats.cpu.percent + '%';
+                document.getElementById('cpu-percent').textContent = stats.proxy_cpu.percent + '%';
+                document.getElementById('cpu-bar').style.width = stats.proxy_cpu.percent + '%';
                 
-                document.getElementById('ram-percent').textContent = stats.ram.percent + '%';
-                document.getElementById('ram-bar').style.width = stats.ram.percent + '%';
-                document.getElementById('ram-details').textContent = `${formatBytes(stats.ram.used)} / ${formatBytes(stats.ram.total)}`;
+                document.getElementById('ram-percent').textContent = stats.proxy_ram.percent + '%';
+                document.getElementById('ram-bar').style.width = stats.proxy_ram.percent + '%';
+                document.getElementById('ram-details').textContent = `${formatBytes(stats.proxy_ram.used)} / ${formatBytes(stats.proxy_ram.total)}`;
                 
                 document.getElementById('disk-percent').textContent = stats.disk.percent + '%';
                 document.getElementById('disk-bar').style.width = stats.disk.percent + '%';

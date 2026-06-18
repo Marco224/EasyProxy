@@ -2,6 +2,7 @@ import logging
 import sys
 import os
 import asyncio
+import aiohttp
 from aiohttp import web
 
 # Configura logging PRIMA di qualsiasi import che possa emettere log
