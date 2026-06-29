@@ -472,7 +472,11 @@ class HLSProxyStreamingMixin:
                         async def iter_any(self):
                             async for chunk in self.c_resp.aiter_content():
                                 yield chunk
-                        async def read(self): return await self.c_resp.acontent()
+                        async def read(self, n=-1):
+                            # curl_cffi's acontent() returns the full body and ignores size.
+                            # Match aiohttp's content.read(n) signature so error-path callers
+                            # (e.g. resp.content.read(4096)) don't raise TypeError.
+                            return await self.c_resp.acontent()
 
                     class MockResp:
                         def __init__(self, c_resp):
